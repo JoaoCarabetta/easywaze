@@ -5,6 +5,7 @@ import requests
 import json
 import datetime
 from dateutil import tz
+import fire
 
 # Local imports
 from utils import create_mysql_engine
@@ -51,13 +52,19 @@ def get_timezone(url):
     return json.loads(requests.get(geourl).text)['timezoneId']
 
 
-def load_yaml():
+def load_yaml(polygon):
 
-    res = yaml.load(open('app/polygons.yaml', 'r'))
+    res = yaml.load(open('polygons.yaml', 'r'))
+
+    if 'cities' not in res.keys():
+        res['cities'] = [{}]
+
     for i, city in enumerate(res['cities']):
     
         if 'url' not in city.keys():
-            res['cities'][i]['url'] = res['url'] + city['coords']
+            polygon = polygon.strip('POLYGON').strip(')').strip('(').\
+                             replace(',', ';').replace(' ', ',')
+            res['cities'][i]['url'] = res['url'] + polygon
             yaml.dump(res, open('polygons.yaml', 'w'))
             
         if 'timezone' not in city.keys():
@@ -103,18 +110,17 @@ def insert_data(data, city, tables, engine):
             continue
 
 
-def main():
+def main(polygon):
     
     # Create engine
-    engine = create_mysql_engine()
-    tables = create_tables(engine)
+    ##engine = create_mysql_engine()
+    #tables = create_tables(engine)
 
-    cities = load_yaml()
+    cities = load_yaml(polygon)
     for city in cities:
         data = request_url(city['url'])
         insert_data(data, city, tables, engine)
 
 
 if __name__ == '__main__':
-    main()
-
+    fire.Fire(main)
