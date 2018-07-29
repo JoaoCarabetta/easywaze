@@ -6,6 +6,8 @@ import json
 import datetime
 from dateutil import tz
 import fire
+import urllib.parse as urlparse
+from urllib.parse import urlencode
 
 # Local imports
 from utils import create_mysql_engine
@@ -51,25 +53,37 @@ def get_timezone(url):
     
     return json.loads(requests.get(geourl).text)['timezoneId']
 
+def improve_url(url):
+    
+    needed_items = {'acotu': 'true',
+             'format': 'JSON',
+             'irmie': 'true',
+             'types': 'traffic,alerts,irregularities'}
+    
+    url, polygon = url.split('&polygon=')
+    
+    url_parts = list(urlparse.urlparse(url))
+    current_items = dict(urlparse.parse_qsl(url_parts[4]))
+    
+    final_items = dict(needed_items, **current_items)
 
-def load_yaml(polygon):
+    url_parts[4] = urlencode(final_items)
 
-    res = yaml.load(open('polygons.yaml', 'r'))
+    return urlparse.urlunparse(url_parts) + '&polygon=' + polygon
 
-    if 'cities' not in res.keys():
-        res['cities'] = [{}]
+def load_yaml():
+
+    res = yaml.load(open('config.yaml', 'r'))
 
     for i, city in enumerate(res['cities']):
-    
-        if 'url' not in city.keys():
-            polygon = polygon.strip('POLYGON').strip(')').strip('(').\
-                             replace(',', ';').replace(' ', ',')
-            res['cities'][i]['url'] = res['url'] + polygon
-            yaml.dump(res, open('polygons.yaml', 'w'))
-            
+
+        if 'acotu=true&irmie=true' not in city['endpoint']:
+            res['cities'][i]['endpoint'] = improve_url(city['endpoint'])
+            yaml.dump(res, open('config.yaml', 'w'))
+        
         if 'timezone' not in city.keys():
-            res['cities'][i]['timezone'] = get_timezone(city['url'])
-            yaml.dump(res, open('polygons.yaml', 'w'))
+            res['cities'][i]['timezone'] = get_timezone(city['endpoint'])
+            yaml.dump(res, open('config.yaml', 'w'))
 
     return res['cities']
 
@@ -110,15 +124,15 @@ def insert_data(data, city, tables, engine):
             continue
 
 
-def main(polygon):
+def main():
     
     # Create engine
-    ##engine = create_mysql_engine()
-    #tables = create_tables(engine)
+    engine = create_mysql_engine()
+    tables = create_tables(engine)
 
-    cities = load_yaml(polygon)
+    cities = load_yaml()
     for city in cities:
-        data = request_url(city['url'])
+        data = request_url(city['endpoint'])
         insert_data(data, city, tables, engine)
 
 

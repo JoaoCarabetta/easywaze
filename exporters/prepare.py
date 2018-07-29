@@ -135,7 +135,6 @@ class Export(object):
             dict -- key: table name, value: sql query
         """
 
-        query = {}
         for table in self.tables:
             query[table] = """
                                 SELECT {column}
