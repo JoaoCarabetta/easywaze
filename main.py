@@ -122,7 +122,7 @@ def insert_data(data, city, tables, engine):
             conn.execute(ins)
             print('[SUCESS] Data inserted!')
         except KeyError:
-            print('[FAIL] Postgre Insertion Failed!')
+            print('[FAIL] MySQL Insertion Failed!')
             continue
 
 
