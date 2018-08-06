@@ -120,10 +120,12 @@ def insert_data(data, city, tables, engine):
                 raw_json=data[table])
             conn = engine.connect()
             conn.execute(ins)
-            print('[SUCESS] Data inserted!')
+            
         except KeyError:
             print('[FAIL] MySQL Insertion Failed!')
             continue
+           
+        print('[SUCESS] Data inserted!')
 
 
 def main():
