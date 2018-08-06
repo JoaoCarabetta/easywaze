@@ -636,6 +636,8 @@ class Postgis(Json):
         self.load_json()
 
         self.clear_json()
+	
+	print('[SUCESS] Data Loaded to Postgis')
 
 if __name__ == '__main__':
 
