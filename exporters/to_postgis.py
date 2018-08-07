@@ -73,15 +73,6 @@ class Postgis(Json):
         self.tables_postgis = {}
 
         metadata = sa.MetaData(self.engine_postgis)
-        
-        for table in self.tables:
-            self.tables_postgis[table + 'raw'] = sa.Table(
-                table, metadata,
-                Column("id",                         INTEGER, nullable=False),
-                Column("timestamp",                  DateTime, nullable=False),
-                Column("city",                       Text, nullable=False),
-                Column("raw_json",                   Text, nullable=False),
-                schema='raw_import',)
 
 
         self.tables_postgis['alerts'] = sa.Table(
