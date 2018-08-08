@@ -122,7 +122,6 @@ def insert_data(data, city, tables, engine):
             conn.execute(ins)
             
         except KeyError:
-            print('[FAIL] MySQL Insertion Failed!')
             continue
            
         print('[SUCESS] Data inserted!')
@@ -137,7 +136,10 @@ def main():
     cities = load_yaml()
     for city in cities:
         data = request_url(city['endpoint'])
-        insert_data(data, city, tables, engine)
+        try:
+            insert_data(data, city, tables, engine)
+        except:
+            print('[FAIL] MySQL Insertion Failed!') 
 
 
 if __name__ == '__main__':
