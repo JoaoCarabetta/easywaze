@@ -20,7 +20,7 @@ def create_engine():
 def create_tables(engine):
 
     try:
-        engine.execute("CREATE DATABASE waze") #create db
+        engine.execute("CREATE DATABASE waze") # create db
     except:
         pass
     engine.execute("USE waze")
@@ -54,7 +54,7 @@ def get_timezone(url):
     return json.loads(requests.get(geourl).text)['timezoneId']
 
 def improve_url(url):
-    
+     
     needed_items = {'acotu': 'true',
              'format': 'JSON',
              'irmie': 'true',
@@ -99,9 +99,6 @@ def request_url(url):
 
 def insert_data(data, city, tables, engine):
 
-    from_zone = tz.tzutc()
-    to_zone = tz.gettz(city['timezone'])
-
     for table, meta in tables.items():
         engine.execute("USE waze")
         try:
@@ -109,13 +106,9 @@ def insert_data(data, city, tables, engine):
                 start_time_millis=data['startTimeMillis'],
                 end_time_millis=data['endTimeMillis'],
                 start_time=(datetime.datetime.
-                            strptime(data['startTime'],'%Y-%m-%d %H:%M:%S:%f').
-                            replace(tzinfo=from_zone).
-                            astimezone(to_zone)),
+                            strptime(data['startTime'], '%Y-%m-%d %H:%M:%S:%f')),
                 end_time=(datetime.datetime.
-                            strptime(data['endTime'],'%Y-%m-%d %H:%M:%S:%f').
-                            replace(tzinfo=from_zone).
-                            astimezone(to_zone)),
+                            strptime(data['endTime'],'%Y-%m-%d %H:%M:%S:%f')),
                 timezone=city['timezone'],
                 raw_json=data[table])
             conn = engine.connect()

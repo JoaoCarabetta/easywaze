@@ -525,16 +525,6 @@ class Postgis(Json):
             with self.engine_postgis.connect() as conn:
                 for chunk in self.chunks(files, self.chunksize):
                     data = self.read_json(chunk, table)
-                    if data:
-                        conn.execute(self.tables_postgis[table].insert(), data)
-
-        self.update_geometry_fields()
-
-    def check_existent_data(self):
-
-        existent_ids = {}
-        with self.engine_postgis.connect() as conn:
-            for table in self.tables:
                 res = conn.execute(
                         select([self.tables_postgis[table].c.datafile_id]))
                 existent_ids[table] = [row[0] for row in res]
@@ -547,6 +537,16 @@ class Postgis(Json):
 
             if table == 'alerts':
 
+                    if data:
+                        conn.execute(self.tables_postgis[table].insert(), data)
+
+        self.update_geometry_fields()
+
+    def check_existent_data(self):
+
+        existent_ids = {}
+        with self.engine_postgis.connect() as conn:
+            for table in self.tables:
                 self.engine_postgis.execute(
                     """
                     update waze.alerts
